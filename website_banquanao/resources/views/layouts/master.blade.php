@@ -84,7 +84,7 @@
             </a>
             <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
               <a class="dropdown-item" href="{{ route('admin.product') }}">Danh sách sản phẩm </a>
-              <a class="dropdown-item" href="#">Danh sách phụ kiện</a>
+              <a class="dropdown-item" href="#">Kho</a>
               <a class="dropdown-item" href="#">Something else here</a>
             </div>
           </li>

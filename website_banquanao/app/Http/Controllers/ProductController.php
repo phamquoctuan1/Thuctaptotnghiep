@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Http\Requests\CategoryRequest;
 use App\Http\Requests\ProductRequest;
+use App\Http\Resources\ProductResource;
 use App\Models\Color;
 use App\Models\Images;
 use App\Models\Product;
@@ -26,7 +27,6 @@ class ProductController extends Controller
      */
     public function index()
     {
-
     }
 
     /**
@@ -36,9 +36,17 @@ class ProductController extends Controller
      */
     public function createProduct()
     {
-        $categories = Category::with('children')->OrderBy('parent_id', 'ASC')->get();
-
-        return view('admin.addproduct', compact('categories'));
+        //$categories = Category::with('children')->with('children','children.children')->OrderBy('parent_id', 'ASC')->get();
+        $data = [
+            'categories' => Category::has('children')
+                ->orWhere('parent_id', 0)    //Get only the parents
+                ->with(['children' => function ($query) {
+                    $query->doesntHave('children');
+                }])
+                ->select('name', 'id')->orderBy('parent_id', 'asc')
+                ->get(),
+        ];
+        return view('admin.addproduct', compact('data'));
     }
 
     /**
@@ -108,7 +116,7 @@ class ProductController extends Controller
         $categories = Category::with('children')->whereNull('parent_id')->get();
         $products = Product::with('images')->with('color')->with('size')->where('url', '=', $url)->first();
 
-        return view('product_detail', compact('categories', 'products'));
+        return view('dg', compact('categories', 'products'));
     }
 
     /**
@@ -119,14 +127,18 @@ class ProductController extends Controller
      */
     public function edit($id)
     {
-        $product = Product::where('id', $id)->first();
-        $categories = Category::with('children')->with('product')->OrderBy('parent_id', 'ASC')->get();
-        foreach ($categories as $category) {
-            if($category->id == $product->categoryid) {
-                 $cat = $category->name;
-            }
-        }
-        return view('admin.editproduct', compact('categories','product','cat'));
+         $product = Product::with('category')->find($id);
+
+        $data = [
+            'categories' => Category::has('children')
+                ->orWhere('parent_id', 0)    //Get only the parents
+                ->with(['children' => function ($query) {
+                    $query->doesntHave('children');
+                }])
+                ->select('name', 'id')->orderBy('parent_id', 'asc')
+                ->get(),
+        ];
+        return view('admin.editproduct', compact('data', 'product'));
     }
 
     /**
@@ -139,37 +151,37 @@ class ProductController extends Controller
     public function update(Request $request)
     {
 
-            $newProduct = Product::find($request->id);
-            $newProduct->name = $request->name;
-            $newProduct->shortdecription = $request->shortdecription;
-            $newProduct->description = $request->description;
-            $newProduct->price = $request->price;
-            $newProduct->discount = $request->discount;
-            $newProduct->status = $request->status;
-            $category = Category::find($request->categoryid);
-            if (!$category) {
-                return response()->json(['message' => "Không tìm thấy danh mục"], 404);
-            }
+        $newProduct = Product::find($request->id);
+        $newProduct->name = $request->name;
+        $newProduct->shortdecription = $request->shortdecription;
+        $newProduct->description = $request->description;
+        $newProduct->price = $request->price;
+        $newProduct->discount = $request->discount;
+        $newProduct->status = $request->status;
+        $category = Category::find($request->categoryid);
+        if (!$category) {
+            return response()->json(['message' => "Không tìm thấy danh mục"], 404);
+        }
 
-            $category->product()->save($newProduct);
-            $newColor =Color::where('productid',$request->id)->first();
-            $newColor->name = $request->color;
-            $newColor->code = $request->code;
-            $newSize = Size::where('productid',$request->id)->first();
-            $newSize->name = $request->size;
-            $newSize->amount = $request->amount;
-            if ($request->hasFile('images')) {
-                foreach ($request->file('images') as $img) {
-                    $imageName = uniqid() . '.' . $img->extension();
-                    $img->move(('storage'), $imageName);
-                    $imageData[] = $imageName;
-                }
-                $newImage = Images::where('imageable_id',$request->id);
-                $newImage->url = 'http://' . request()->getHost() . '8000/images/product/' . $imageName;
-                $newImage->name = $imageData;
-                $newImage->save();
+        $category->product()->save($newProduct);
+        $newColor = Color::where('productid', $request->id)->first();
+        $newColor->name = $request->color;
+        $newColor->code = $request->code;
+        $newSize = Size::where('productid', $request->id)->first();
+        $newSize->name = $request->size;
+        $newSize->amount = $request->amount;
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $img) {
+                $imageName = uniqid() . '.' . $img->extension();
+                $img->move(('storage'), $imageName);
+                $imageData[] = $imageName;
             }
-            return redirect('/admin/product');
+            $newImage = Images::where('imageable_id', $request->id);
+            $newImage->url = 'http://' . request()->getHost() . '8000/images/product/' . $imageName;
+            $newImage->name = $imageData;
+            $newImage->save();
+        }
+        return redirect('/admin/product');
     }
 
     /**

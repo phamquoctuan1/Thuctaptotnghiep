@@ -61,9 +61,9 @@ class CategoryController extends Controller
      */
     public function show($url)
     {
-
         $categories = Category::latest()->with('children','children.product')->with('children','children.children.product')->with('product')->where('url',$url)->first();
-         return view('category', compact('categories'));
+
+         return view('product', compact('categories'));
     }
 
     /**

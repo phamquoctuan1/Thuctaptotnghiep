@@ -19,7 +19,7 @@
 </head>
 
 <body id="home">
-    <div class="wrapper">
+    < class="wrapper">
         <div class="header">
             <div class="container">
                 <div class="row">
@@ -138,15 +138,7 @@
             </div>
         </div>
         @include('slide')
-        <div class="clearfix"></div>
-        <div class="container_fullwidth">
-            <div class="container">
-                <div class="hot-products">
-                    <h3 class="title"><strong>Hot</strong> Products</h3>
-                    {{-- <div class="control"><a id="prev_hot" class="prev" href="#">&lt;</a><a id="next_hot" class="next"
-                            href="#">&gt;</a></div> --}}
-                     @include('product')
-                </div>
+               @yield('content')
                 @include('brand')
                 @include('footer')
         <script type="text/javascript" src="{{ asset('js/jquery-1.10.2.min.js') }}"></script>

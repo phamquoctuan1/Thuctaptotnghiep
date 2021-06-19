@@ -1,3 +1,13 @@
+@extends('category')
+@section('title')
+    Trang chủ
+@endsection
+@section('content')
+<div class="clearfix"></div>
+<div class="container_fullwidth">
+    <div class="container">
+        <div class="hot-products">
+            <h3 class="title"><strong>Hot</strong> Products</h3>
 <ul id="hot">
     <li>
         <div class="row">
@@ -46,3 +56,22 @@
         </div>
     </li>
 </ul>
+</div>
+<div class="clearfix"></div>
+<div class="featured-products">
+    <h3 class="title"><strong>Sale</strong> Products</h3>
+    <ul id="featured">
+        <li>
+            <div class="row">
+
+
+            </div>
+        </li>
+        <li>
+            <div class="row">
+
+            </div>
+        </li>
+    </ul>
+</div>
+@endsection

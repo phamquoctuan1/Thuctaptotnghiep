@@ -21,7 +21,7 @@ class HomeController extends Controller
         $categories = Category::with('children')->whereNull('parent_id')->get();
         $products = Product::with('images')->with('color')->with('size')->orderBy('name','DESC')->paginate(8);
 
-        return view('index', compact('categories','products'));
+        return view('home', compact('categories','products'));
     }
     public function destroy($id)
     {
